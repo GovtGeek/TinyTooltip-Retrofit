@@ -13,7 +13,7 @@ local function GetTargetString(unit)
     if (not UnitExists(unit)) then return end
     local name = UnitName(unit)
     local icon = addon:GetRaidIcon(unit) or ""
-    if UnitIsUnit(unit, "player") then
+    if C_Secrets.CanCompareUnitTokens(unit, "player") and UnitIsUnit(unit, "player") then
         return format("|cffff3333>>%s<<|r", strupper(YOU))
     elseif UnitIsPlayer(unit) then
         local class = select(2, UnitClass(unit))
