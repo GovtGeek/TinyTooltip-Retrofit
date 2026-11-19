@@ -39,9 +39,11 @@ LibEvent:attachTrigger("tooltip:item", function(self, tip, link)
     ItemIcon(tip, link)
 end)
 
-hooksecurefunc("EmbeddedItemTooltip_OnTooltipSetItem", function(self)
-    local tip = self:GetParent()
-    if (not tip or tip:GetObjectType() ~= "GameTooltip") then return end
-    local r, g, b = self.IconBorder:GetVertexColor()
-    ColorBorder(tip, r, g, b)
-end)
+if(type(_G["EmbeddedItemTooltip_OnTooltipSetItem"]) == "function") then
+    hooksecurefunc("EmbeddedItemTooltip_OnTooltipSetItem", function(self)
+        local tip = self:GetParent()
+        if (not tip or tip:GetObjectType() ~= "GameTooltip") then return end
+        local r, g, b = self.IconBorder:GetVertexColor()
+        ColorBorder(tip, r, g, b)
+    end)
+end
