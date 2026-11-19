@@ -1,4 +1,3 @@
-
 -------------------------------------
 -- Core Author:M
 -------------------------------------
@@ -142,7 +141,7 @@ function addon:FindLine(tooltip, keyword)
     for i = 2, tooltip:NumLines() do
         line = _G[tooltip:GetName() .. "TextLeft" .. i]
         text = line:GetText() or ""
-        if (strfind(text, keyword)) then
+        if (canaccessvalue(text) and strfind(text, keyword)) then
             return line, i, _G[tooltip:GetName() .. "TextRight" .. i]
         end
     end
@@ -306,7 +305,7 @@ end
 -- 移動速度
 function addon:GetUnitSpeed(unit)
     local _, speed, flightSpeed, swimSpeed = GetUnitSpeed(unit)
-    if (not speed or speed == 0) then return end
+    if (not canaccessvalue(speed) or not speed or speed == 0) then return end
     speed = speed/BASE_MOVEMENT_SPEED*100
     swimSpeed = swimSpeed/BASE_MOVEMENT_SPEED*100
 	flightSpeed = flightSpeed/BASE_MOVEMENT_SPEED*100
