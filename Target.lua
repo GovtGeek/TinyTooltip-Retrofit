@@ -1,3 +1,4 @@
+local addonName = ...
 
 local LibEvent = LibStub:GetLibrary("LibEvent.7000")
 
@@ -13,11 +14,14 @@ local function GetTargetString(unit)
     if (not UnitExists(unit)) then return end
     local name = UnitName(unit)
     local icon = addon:GetRaidIcon(unit) or ""
-    if UnitIsUnit(unit, "player") then
+    local scrubbedUnitIsUnit = scrubsecretvalues(UnitIsUnit(unit, "player"))
+    --if UnitIsUnit(unit, "player") then
+    if scrubbedUnitIsUnit then
         return format("|cffff3333>>%s<<|r", strupper(YOU))
     elseif UnitIsPlayer(unit) then
         local class = select(2, UnitClass(unit))
-        local colorCode = select(4, GetClassColor(class))
+        local colorCode = C_ClassColor.GetClassColor(class):GenerateHexColor()
+        --local colorCode = select(4, GetClassColor(class))
         return format("%s|c%s%s|r", icon, colorCode, name)
     elseif UnitIsOtherPlayersPet(unit) then
         return format("%s|cff%s<%s>|r", icon, addon:GetHexColor(GameTooltip_UnitColor(unit)), name)
@@ -25,6 +29,22 @@ local function GetTargetString(unit)
         return format("%s|cff%s[%s]|r", icon, addon:GetHexColor(GameTooltip_UnitColor(unit)), name)
     end
 end
+
+-- I hate doing this, but it's the only way I can avoid secret issues
+-- Blizzard doesn't want us scanning the tooltip, but won't provide a 'safe' section of the tooltip for us to use
+----[[
+local combatTargetTooltip = CreateFrame("GameTooltip", addonName.."CombatTargetTooltip", GameTooltip, "GameTooltipTemplate")
+combatTargetTooltip:SetOwner(GameTooltip, "ANCHOR_BOTTOM", 0, -50)
+combatTargetTooltip:ClearLines()
+if addon.db.general.bodyFontSize == "default" then
+	local fontInfo = GetFontInfo(GameTooltipText)
+	_G[combatTargetTooltip:GetName().."TextLeft1"]:SetFont(fontInfo.fontObject:GetFont(), fontInfo.height, "")
+else
+    combatTargetTooltip:SetFontHeight(addon.db.general.bodyFontSize)
+end
+GameTooltip:HookScript("OnHide", function() combatTargetTooltip:Hide() end)
+GameTooltip:HookScript("OnTooltipCleared", function() combatTargetTooltip:Hide() end)
+--]]
 
 GameTooltip:HookScript("OnUpdate", function(self, elapsed)
     self.updateElapsed = (self.updateElapsed or 0) + elapsed
@@ -35,7 +55,19 @@ GameTooltip:HookScript("OnUpdate", function(self, elapsed)
             or (addon.db.unit.npc.showTarget and not UnitIsPlayer("mouseover")) then
             local line = addon:FindLine(self, "^"..TARGET..":")
             local text = GetTargetString("mouseovertarget")
-            if (line and not text) then
+            local isSecretTime = not canaccessvalue(_G[self:GetName().."TextLeft1"]:GetText())
+            if isSecretTime then
+				-- When the tooltip is secret, we use a custom target tooltip
+				combatTargetTooltip:Show()
+                if text then
+					combatTargetTooltip:SetOwner(GameTooltip, "ANCHOR_BOTTOM", 0, -3)
+					combatTargetTooltip:ClearLines()
+					combatTargetTooltip:AddLine(format("%s: %s", TARGET, text))
+					combatTargetTooltip:Show()
+				else
+					combatTargetTooltip:Hide()
+                end
+            elseif (line and not text) then
                 addon:HideLine(self, "^"..TARGET..":")
                 self:Show()
             elseif (not line and text) then
@@ -47,7 +79,6 @@ GameTooltip:HookScript("OnUpdate", function(self, elapsed)
         end
     end
 end)
-
 
 -- Targeted By
 
