@@ -25,8 +25,10 @@ local function ColorStatusBar(self, value)
             r, g, b = GetClassColor(select(2,UnitClass(unit)))
         else
             r, g, b = GameTooltip_UnitColor(unit)
-            if (g == 0.6) then g = 0.9 end
-            if (r==1 and g==1 and b==1) then r, g, b = 0, 0.9, 0.1 end
+            if canaccessvalue(r) then
+            	if (g == 0.6) then g = 0.9 end
+            	if (r==1 and g==1 and b==1) then r, g, b = 0, 0.9, 0.1 end
+            end
         end
         self:SetStatusBarColor(r, g, b)
     elseif (value and addon.db.general.statusbarColor == "smooth") then
