@@ -1,8 +1,8 @@
-## Interface: 50504, 40402, 30403, 20505, 11508
+## Interface: 120105, 50504, 40402, 30403, 20505, 11508, 16001
 ## Title: TinyTooltip
 ## Notes: TinyTooltip
 ## Author: M, GovtGeek
-## Version: 5.5.4.0
+## Version: 5.5.4.1-beta-01
 ## SavedVariables: BigTipDB
 ## SavedVariablesPerCharacter: TinyTooltipCharacterDB
 
