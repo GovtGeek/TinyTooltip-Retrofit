@@ -268,8 +268,12 @@ end
 -- 標記圖標
 function addon:GetRaidIcon(unit)
     local index = GetRaidTargetIndex(unit)
-    if (index and ICON_LIST[index]) then
-        return ICON_LIST[index] .. "0|t"
+    if canaccessvalue(index) then
+        if (index and ICON_LIST[index]) then
+            return ICON_LIST[index] .. "0|t"
+        end
+    else
+        return index
     end
 end
 
