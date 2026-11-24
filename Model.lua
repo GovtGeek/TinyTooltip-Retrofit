@@ -19,8 +19,36 @@ LibEvent:attachTrigger("tooltip:init", function(self, tip)
     end
 end)
 
+local function _ModelTooltipUnit(tip, unit)
+    if (tip ~= GameTooltip) then return end
+	local _, unit = tip:GetUnit()
+    if (not UnitIsVisible(unit)) then return end
+    if (addon.db.unit.player.showModel and UnitIsPlayer(unit)) then
+        tip.model:SetUnit(unit)
+        tip.model:SetFacing(-0.25)
+        tip.model:Show()
+    elseif (addon.db.unit.npc.showModel and not UnitIsPlayer(unit)) then
+        tip.model:SetUnit(unit)
+        tip.model:SetFacing(-0.25)
+        tip.model:Show()
+    else
+        tip.model:ClearModel()
+        tip.model:Hide()
+    end
+end
+
+if type(TooltipDataProcessor) == "table" then
+	TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tip, data)
+		_ModelTooltipUnit(tip)
+	 end)
+else
+	LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit) _ModelTooltipUnit(tip, unit) end)
+end
+
+--[[
 LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
     if (tip ~= GameTooltip) then return end
+	local _, unit = tooltip:GetUnit()
     if (not UnitIsVisible(unit)) then return end
     if (addon.db.unit.player.showModel and UnitIsPlayer(unit)) then
         tip.model:SetUnit(unit)
@@ -35,6 +63,7 @@ LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
         tip.model:Hide()
     end
 end)
+]]
 
 LibEvent:attachTrigger("tooltip:cleared", function(self, tip)
     if (tip ~= GameTooltip) then return end
