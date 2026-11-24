@@ -24,10 +24,15 @@ local function ColorStatusBar(self, value)
         if (UnitIsPlayer(unit)) then
             r, g, b = GetClassColor(select(2,UnitClass(unit)))
         else
-            r, g, b = GameTooltip_UnitColor(unit)
+            --r, g, b = GameTooltip_UnitColor(unit)
+            r, g, b = C_ClassColor.GetClassColor(unit)
             if canaccessvalue(r) then
             	if (g == 0.6) then g = 0.9 end
             	if (r==1 and g==1 and b==1) then r, g, b = 0, 0.9, 0.1 end
+            	--if (not r) then r, g, b = 0, 0.9, 0.1 end
+				if (not r) then r, g, b = UnitSelectionColor(unit) end
+            else
+				r, g, b = UnitSelectionColor(unit)
             end
         end
         self:SetStatusBarColor(r, g, b)
