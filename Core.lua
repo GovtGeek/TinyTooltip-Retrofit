@@ -141,10 +141,8 @@ function addon:FindLine(tooltip, keyword)
     for i = 2, tooltip:NumLines() do
         line = _G[tooltip:GetName() .. "TextLeft" .. i]
         text = line:GetText() or ""
-        if canaccessvalue(text) then
-            if strfind(text, keyword) then
-                return line, i, _G[tooltip:GetName() .. "TextRight" .. i]
-            end
+        if (canaccessvalue(text) and strfind(text, keyword)) then
+            return line, i, _G[tooltip:GetName() .. "TextRight" .. i]
         end
     end
 end
