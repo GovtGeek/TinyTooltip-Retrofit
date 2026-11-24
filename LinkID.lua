@@ -22,12 +22,23 @@ local function ShowId(tooltip, name, value, noBlankLine)
 end
 
 local function ShowLinkIdInfo(tooltip)
-    ShowId(tooltip, ParseHyperLink(select(2,TooltipUtil.GetDisplayedItem(tooltip))))
+    local link = nil
+    if type(TooltipUtil) == "table" then
+        link = select(2, TooltipUtil.GetDisplayedItem(tooltip))
+    else
+        link = select(2, tooltip:GetItem())
+    end
+    ShowId(tooltip, ParseHyperLink(link))
 end
 
 -- keystone
 local function KeystoneAffixDescription(tooltip)
-    local link = select(2, TooltipUtil.GetDisplayedItem(tooltip))
+    local link = nil
+    if type(TooltipUtil) == "table" then
+        link = select(2, TooltipUtil.GetDisplayedItem(tooltip))
+    else
+        link = select(2, tooltip:GetItem())
+    end
     if not link then return end
     local data, name, description, AffixID
     if (link and strfind(link, "keystone:")) then
@@ -48,9 +59,6 @@ local function KeystoneAffixDescription(tooltip)
     end
 end
 
-TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, KeystoneAffixDescription)
---GameTooltip:HookScript("OnTooltipSetItem", KeystoneAffixDescription)
-
 hooksecurefunc(ItemRefTooltip, "SetHyperlink", KeystoneAffixDescription)
 
 -- Item
@@ -58,19 +66,21 @@ hooksecurefunc(GameTooltip, "SetHyperlink", ShowLinkIdInfo)
 hooksecurefunc(ItemRefTooltip, "SetHyperlink", ShowLinkIdInfo)
 hooksecurefunc("SetItemRef", function(link) ShowLinkIdInfo(ItemRefTooltip, link) end)
 
-TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, ShowLinkIdInfo)
---[[
-GameTooltip:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-ItemRefTooltip:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-ShoppingTooltip1:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-ShoppingTooltip2:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-ItemRefShoppingTooltip1:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-ItemRefShoppingTooltip2:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
-]]
-
+if type(TooltipDataProcessor) == "table" then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, KeystoneAffixDescription)
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, ShowLinkIdInfo)
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, function(self) ShowId(self, "Spell", (select(2,self:GetSpell()))) end)
+else
+    GameTooltip:HookScript("OnTooltipSetItem", KeystoneAffixDescription)
+    GameTooltip:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    ItemRefTooltip:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    ShoppingTooltip1:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    ShoppingTooltip2:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    ItemRefShoppingTooltip1:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    ItemRefShoppingTooltip2:HookScript("OnTooltipSetItem", ShowLinkIdInfo)
+    GameTooltip:HookScript("OnTooltipSetSpell", function(self) ShowId(self, "Spell", (select(2,self:GetSpell()))) end)
+end
 -- Spell
-TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, function(self) ShowId(self, "Spell", (select(2,self:GetSpell()))) end)
---GameTooltip:HookScript("OnTooltipSetSpell", function(self) ShowId(self, "Spell", (select(2,self:GetSpell()))) end)
 hooksecurefunc(GameTooltip, "SetUnitAura", function(self, ...) ShowId(self, "Spell", (select(10,UnitAura(...)))) end)
 hooksecurefunc(GameTooltip, "SetUnitBuff", function(self, ...) ShowId(self, "Spell", (select(10,UnitBuff(...)))) end)
 hooksecurefunc(GameTooltip, "SetUnitDebuff", function(self, ...) ShowId(self, "Spell", (select(10,UnitDebuff(...)))) end)
