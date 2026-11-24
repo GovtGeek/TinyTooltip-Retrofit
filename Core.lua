@@ -27,6 +27,8 @@ local UnitIsQuestBoss = UnitIsQuestBoss or function() end
 local IsFlying = IsFlying or function() end
 local C_BattleNet_GetAccountInfoByGUID = C_BattleNet and C_BattleNet.GetAccountInfoByGUID or function() end
 
+-- Hack for Forever
+local isForever = GetRealmName() == ""
 
 local addon = TinyTooltip
 
@@ -373,6 +375,12 @@ end
 local t = {}
 function addon:GetUnitInfo(unit)
     local name, realm = UnitName(unit)
+    if isForever then
+        realm = ""
+        local lastName
+        name, lastName = UnitName(unit)
+        if lastName then name = name:concat(' ', lastName) end
+    end
     local pvpName = UnitPVPName(unit)
     local gender = UnitSex(unit)
     local level = UnitLevel(unit)
