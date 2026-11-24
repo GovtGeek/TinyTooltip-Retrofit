@@ -115,14 +115,28 @@ local function NonPlayerCharacter(tip, unit, config, raw)
     ShowBigFactionIcon(tip, config, raw)
 end
 
-LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
-    local raw = addon:GetUnitInfo(unit)
-    if (UnitIsPlayer(unit)) then
-        PlayerCharacter(tip, unit, addon.db.unit.player, raw)
-    else
-        NonPlayerCharacter(tip, unit, addon.db.unit.npc, raw)
-    end
-end)
+if type(TooltipDataProcessor) == "table" then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tip, data)
+        if tip ~= GameTooltip then return end
+        local _, unit = tip:GetUnit()
+        local raw = addon:GetUnitInfo(unit)
+        if (UnitIsPlayer(unit)) then
+            PlayerCharacter(tip, unit, addon.db.unit.player, raw)
+        else
+            NonPlayerCharacter(tip, unit, addon.db.unit.npc, raw)
+        end
+    end)
+else
+    LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
+        local raw = addon:GetUnitInfo(unit)
+        if (UnitIsPlayer(unit)) then
+            PlayerCharacter(tip, unit, addon.db.unit.player, raw)
+        else
+            NonPlayerCharacter(tip, unit, addon.db.unit.npc, raw)
+        end
+    end)
+end
+
 
 addon.ColorUnitBorder = ColorBorder
 addon.ColorUnitBackground = ColorBackground
