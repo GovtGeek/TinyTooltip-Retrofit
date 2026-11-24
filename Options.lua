@@ -177,7 +177,8 @@ function widgets:colorpick(parent, config)
             r = r, g = g, b = b, opacity = 1-a, hasOpacity = self.hasopacity,
             opacityFunc = self.hasopacity and function()
                 local r, g, b = ColorPickerFrame:GetColorRGB()
-                local a = 1-format("%.2f", OpacitySliderFrame:GetValue())
+                --local a = 1-format("%.2f", OpacitySliderFrame:GetValue())
+                local a = 1-format("%.2f", ColorPickerFrame:GetColorAlpha())
                 local aa = select(4, ColorPickerFrame.tipframe:GetNormalTexture():GetVertexColor())
                 r = tonumber(format("%.4f",r))
                 g = tonumber(format("%.4f",g))
@@ -189,7 +190,8 @@ function widgets:colorpick(parent, config)
             end,
             swatchFunc = function()
                 local r, g, b = ColorPickerFrame:GetColorRGB()
-                local a = 1-format("%.2f", OpacitySliderFrame:GetValue())
+                --local a = 1-format("%.2f", OpacitySliderFrame:GetValue())
+                local a = 1-format("%.2f", ColorPickerFrame:GetColorAlpha())
                 r = tonumber(format("%.4f",r))
                 g = tonumber(format("%.4f",g))
                 b = tonumber(format("%.4f",b))
@@ -206,7 +208,8 @@ function widgets:colorpick(parent, config)
             end,
         }
         ColorPickerFrame.tipframe = self
-        if (not self.hasopacity) then OpacitySliderFrame:SetValue(info.opacity) end
+        --if (not self.hasopacity) then OpacitySliderFrame:SetValue(info.opacity) end
+        if (not self.hasopacity) then ColorPickerFrame:SetColorAlpha(info.opacity) end
         if ColorPickerFrame then
             ColorPickerFrame:SetupColorPickerAndShow(info)
         else
@@ -800,43 +803,39 @@ end)
 
 local addonCategory = Settings.RegisterCanvasLayoutCategory(frame, addonName)
 Settings.RegisterAddOnCategory(addonCategory)
-Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutSubcategory(addonCategory, framePCScrollFrame, framePCScrollFrame.name))
-Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutSubcategory(addonCategory, frameNPCScrollFrame, frameNPCScrollFrame.name))
-Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutSubcategory(addonCategory, frameSpell, frameSpell.name))
-Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutSubcategory(addonCategory, frameFont, frameFont.name))
-Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutSubcategory(addonCategory, frameVariables, frameVariables.name))
 
---[[
-InterfaceOptions_AddCategory(frame)
-InterfaceOptions_AddCategory(framePCScrollFrame)
-InterfaceOptions_AddCategory(frameNPCScrollFrame)
-InterfaceOptions_AddCategory(frameStatusbar)
-InterfaceOptions_AddCategory(frameSpell)
-InterfaceOptions_AddCategory(frameFont)
-InterfaceOptions_AddCategory(frameVariables)
---]]
+local settingsCategoryFrames = {
+    framePCScrollFrame, frameNPCScrollFrame, frameSpell, frameFont, frameVariables,
+}
+local settingsCategories = {
+}
+
+for _, frame in pairs(settingsCategoryFrames) do
+    local subCategory = Settings.RegisterCanvasLayoutSubcategory(addonCategory, frame, frame.name)
+    settingsCategories[frame.name] = subCategory:GetID()
+    Settings.RegisterAddOnCategory(subCategory)
+end
+
 SLASH_TinyTooltip1 = "/tinytooltip"
 SLASH_TinyTooltip2 = "/tt"
 SLASH_TinyTooltip3 = "/tip"
 function SlashCmdList.TinyTooltip(msg, editbox)
     if (msg == "reset") then
         BigTipDB = {}
+    elseif (msg == "font") then
+        Settings.OpenToCategory(settingsCategories[frameFont.name])
     elseif (msg == "npc") then
-        Settings.OpenToCategory(frameNPC)
-        --InterfaceOptionsFrame_OpenToCategory(frameNPC)
+        Settings.OpenToCategory(settingsCategories[frameNPC.name])
     elseif (msg == "player") then
-        Settings.OpenToCategory(framePCScrollFrame)
-        --InterfaceOptionsFrame_OpenToCategory(framePCScrollFrame)
+        Settings.OpenToCategory(settingsCategories[framePCScrollFrame.name])
     elseif (msg == "spell") then
-        Settings.OpenToCategory(frameSpell)
-        --InterfaceOptionsFrame_OpenToCategory(frameSpell)
+        Settings.OpenToCategory(settingsCategories[frameSpell.name])
     elseif (msg == "statusbar") then
-        Settings.OpenToCategory(frameStatusbar)
-        --InterfaceOptionsFrame_OpenToCategory(frameStatusbar)
+        Settings.OpenToCategory(settingsCategories[frameStatusbar.name])
+    elseif (msg == "variables") then
+        Settings.OpenToCategory(settingsCategories[frameVariables.name])
     else
-        Settings.OpenToCategory(frameStatusbar)
-        --InterfaceOptionsFrame_OpenToCategory(frameStatusbar)
-        --InterfaceOptionsFrame_OpenToCategory(frame)
+        Settings.OpenToCategory(addonCategory:GetID())
     end
 end
 
