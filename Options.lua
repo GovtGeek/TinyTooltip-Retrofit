@@ -804,11 +804,11 @@ end)
 local addonCategory = Settings.RegisterCanvasLayoutCategory(frame, addonName)
 Settings.RegisterAddOnCategory(addonCategory)
 
+-- Order is important
 local settingsCategoryFrames = {
     framePCScrollFrame, frameNPCScrollFrame, frameSpell, frameFont, frameVariables,
 }
-local settingsCategories = {
-}
+local settingsCategories = {}
 
 for _, frame in pairs(settingsCategoryFrames) do
     local subCategory = Settings.RegisterCanvasLayoutSubcategory(addonCategory, frame, frame.name)
