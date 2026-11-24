@@ -32,7 +32,7 @@ end
 
 -- I hate doing this, but it's the only way I can avoid secret issues
 -- Blizzard doesn't want us scanning the tooltip, but won't provide a 'safe' section of the tooltip for us to use
-----[[
+--[[
 local combatTargetTooltip = CreateFrame("GameTooltip", addonName.."CombatTargetTooltip", GameTooltip, "GameTooltipTemplate")
 combatTargetTooltip:SetOwner(GameTooltip, "ANCHOR_BOTTOM", 0, -50)
 combatTargetTooltip:ClearLines()
@@ -57,6 +57,7 @@ GameTooltip:HookScript("OnUpdate", function(self, elapsed)
             local text = GetTargetString("mouseovertarget")
             local isSecretTime = not canaccessvalue(_G[self:GetName().."TextLeft1"]:GetText())
             if isSecretTime then
+                --[[ Don't do anything with target information during 'secret' time
 				-- When the tooltip is secret, we use a custom target tooltip
 				combatTargetTooltip:Show()
                 if text then
@@ -67,6 +68,7 @@ GameTooltip:HookScript("OnUpdate", function(self, elapsed)
 				else
 					combatTargetTooltip:Hide()
                 end
+                ]]
             elseif (line and not text) then
                 addon:HideLine(self, "^"..TARGET..":")
                 self:Show()
@@ -107,8 +109,12 @@ local function GetTargetByString(mouseover, num, tip)
     end
 end
 
-LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
-    if (tip:IsUnit("mouseover")) then
+--LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
+--TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tip, data)
+local function _TargetTooltipUnit(tip)
+    if (tip ~= GameTooltip) then return end
+    --if (tip:IsUnit("mouseover")) then
+    if (tip:GetUnit()) then
         local num = GetNumGroupMembers()
         if (num >= 1) and
           ((addon.db.unit.player.showTargetBy and UnitIsPlayer("mouseover"))
@@ -119,4 +125,12 @@ LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit)
             end
         end
     end
-end)
+end
+
+if type(TooltipDataProcessor) == "table" then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tip, data)
+        _TargetTooltipUnit(tip)
+    end)
+else
+    LibEvent:attachTrigger("tooltip:unit", function(self, tip, unit) _TargetTooltipUnit(tip) end)
+end
