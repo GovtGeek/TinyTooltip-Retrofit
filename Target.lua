@@ -89,6 +89,7 @@ local function GetTargetByString(mouseover, num, tip)
     local roleIcon, colorCode, name
     local first = true
     local isPlayer = UnitIsPlayer(mouseover)
+    if canaccesssecrets() then
     for i = 1, num do
         if UnitIsUnit(mouseover, prefix..i.."target") and not UnitIsUnit(prefix..i, "player") then
             count = count + 1
@@ -103,6 +104,7 @@ local function GetTargetByString(mouseover, num, tip)
                 tip:AddLine("   " .. roleIcon .. " |c" .. colorCode .. name .. "|r")
             end
         end
+    end
     end
     if (count > 0 and not isPlayer and prefix ~= "party") then
         return format("|cff33ffff%s|r", count)
