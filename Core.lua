@@ -240,6 +240,7 @@ end
 
 -- 任務怪
 function addon:GetQuestBossIcon(unit)
+    if not unit or not canaccessvalue(unit) then return end
     if UnitIsQuestBoss(unit) then
         return self.icons.questboss
     end
@@ -247,6 +248,7 @@ end
 
 -- PVP圖標
 function addon:GetPVPIcon(unit)
+    if not unit or not canaccessvalue(unit) then return end
     if (UnitIsPVPFreeForAll(unit)) then
         return self.icons.pvp
     end
@@ -254,6 +256,7 @@ end
 
 -- 角色圖標
 function addon:GetRoleIcon(unit)
+    if not unit or not canaccessvalue(unit) then return end
     local role = UnitGroupRolesAssigned(unit)
     if (role) then
         return self.icons[strupper(role)]
@@ -267,6 +270,7 @@ end
 
 -- 標記圖標
 function addon:GetRaidIcon(unit)
+    if not unit or not canaccessvalue(unit) then return end
     local index = GetRaidTargetIndex(unit)
     if canaccessvalue(index) then
         if (index and ICON_LIST[index]) then
@@ -286,6 +290,7 @@ end
 
 --好友图标
 function addon:GetFriendIcon(unit)
+    if not unit or not canaccessvalue(unit) then return end
     if (UnitIsPlayer(unit)) then
         local guid = UnitGUID(unit)
         if (guid and C_FriendList.IsFriend(guid)) then
@@ -353,6 +358,7 @@ end
 
 --地區
 function addon:GetZone(unit, unitname, realm)
+    if not unit or not canaccessvalue(unit) then return end
     if not IsInGroup() then return end
     local t, i = string.match(unit, "(.-)(%d+)")
     if (i and t == "raid") then
@@ -374,6 +380,7 @@ end
 -- 全信息
 local t = {}
 function addon:GetUnitInfo(unit)
+    if not unit then return end
     local name, realm = UnitName(unit)
     if isForever then
         realm = ""
@@ -381,17 +388,38 @@ function addon:GetUnitInfo(unit)
         name, lastName = UnitName(unit)
         if lastName then name = name:concat(' ', lastName) end
     end
-    local pvpName = UnitPVPName(unit)
-    local gender = UnitSex(unit)
-    local level = UnitLevel(unit)
-    local effectiveLevel = UnitEffectiveLevel(unit)
-    local raceName, race = UnitRace(unit)
-    local className, class = UnitClass(unit)
-    local factionGroup, factionName = UnitFactionGroup(unit)
-    local reaction = UnitReaction(unit, "player")
-    local guildName, guildRank, guildIndex, guildRealm = GetGuildInfo(unit)
-    local classif = UnitClassification(unit)
-    local role = UnitGroupRolesAssigned(unit)
+
+	local pvpName
+    local gender
+    local level = 0
+    local effectiveLevel
+    local raceName, race
+    local className, class
+    local factionGroup, factionName
+    local reaction
+    local guildName, guildRank, guildIndex, guildRealm
+    local role
+
+    if canaccesssecrets() then
+        pvpName = UnitPVPName(unit)
+        gender = UnitSex(unit)
+        level = UnitLevel(unit)
+        effectiveLevel = UnitEffectiveLevel(unit)
+        raceName, race = UnitRace(unit)
+        className, class = UnitClass(unit)
+        factionGroup, factionName = UnitFactionGroup(unit)
+        reaction = UnitReaction(unit, "player")
+        guildName, guildRank, guildIndex, guildRealm = GetGuildInfo(unit)
+        classif = UnitClassification(unit)
+        role = UnitGroupRolesAssigned(unit)
+
+		t.statusAFK    = UnitIsAFK(unit) and AFK
+	    t.statusDND    = UnitIsDND(unit) and DND
+	    t.statusDC     = not UnitIsConnected(unit) and OFFLINE
+	    t.creature     = UnitCreatureType(unit)
+	    t.isPlayer     = UnitIsPlayer(unit) and PLAYER
+	    t.moveSpeed    = self:GetUnitSpeed(unit)
+	end
 
     t.raidIcon     = self:GetRaidIcon(unit)
     t.pvpIcon      = self:GetPVPIcon(unit)
@@ -413,17 +441,17 @@ function addon:GetUnitInfo(unit)
     t.guildRank    = guildRank
     t.guildIndex   = guildName and guildIndex
     t.guildRealm   = guildRealm
-    t.statusAFK    = UnitIsAFK(unit) and AFK
-    t.statusDND    = UnitIsDND(unit) and DND
-    t.statusDC     = not UnitIsConnected(unit) and OFFLINE
+    --t.statusAFK    = UnitIsAFK(unit) and AFK
+    --t.statusDND    = UnitIsDND(unit) and DND
+    --t.statusDC     = not UnitIsConnected(unit) and OFFLINE
     t.reactionName = reaction and _G["FACTION_STANDING_LABEL"..reaction]
-    t.creature     = UnitCreatureType(unit)
-    t.classifBoss  = (level==-1 or classif == "worldboss") and BOSS
+    --t.creature     = UnitCreatureType(unit)
+	t.classifBoss  = (level==-1 or classif == "worldboss") and BOSS
     t.classifElite = classif == "elite" and ELITE
     t.classifRare  = (classif == "rare" or classif == "rareelite") and RARE
-    t.isPlayer     = UnitIsPlayer(unit) and PLAYER
-    t.moveSpeed    = self:GetUnitSpeed(unit)
-    t.zone         = self:GetZone(unit, t.name, t.realm)
+    --t.isPlayer     = UnitIsPlayer(unit) and PLAYER
+    --t.moveSpeed    = self:GetUnitSpeed(unit)
+	t.zone         = self:GetZone(unit, t.name, t.realm)
     t.unit         = unit                     --unit
     t.level        = level                    --1~123|-1
     t.effectiveLevel = effectiveLevel or level
@@ -477,10 +505,12 @@ end
 
 -- 獲取數據
 function addon:GetUnitData(unit, elements, raw)
+    if not unit then return end
     local data = {}
     local config, name, title
     if (not raw) then
         raw = self:GetUnitInfo(unit)
+        if not raw then return end
     end
     for i, v in ipairs(elements) do
         data[i] = {}
