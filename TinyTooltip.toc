@@ -2,7 +2,7 @@
 ## Title: TinyTooltip
 ## Notes: TinyTooltip
 ## Author: M, GovtGeek
-## Version: 5.5.4.1-beta-02
+## Version: 5.5.4.1-beta-03
 ## SavedVariables: BigTipDB
 ## SavedVariablesPerCharacter: TinyTooltipCharacterDB
 
