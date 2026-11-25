@@ -21,7 +21,8 @@ end)
 
 local function _ModelTooltipUnit(tip, unit)
     if (tip ~= GameTooltip) then return end
-	local _, unit = tip:GetUnit()
+    if not unit then unit = tip:GetUnit() end
+    if not unit or not canaccessvalue(unit) then return end
     if (not UnitIsVisible(unit)) then return end
     if (addon.db.unit.player.showModel and UnitIsPlayer(unit)) then
         tip.model:SetUnit(unit)
