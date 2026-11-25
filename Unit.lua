@@ -69,6 +69,7 @@ local function ShowBigFactionIcon(tip, config, raw)
 end
 
 local function PlayerCharacter(tip, unit, config, raw)
+    if not unit or not canaccessvalue(unit) then return end
     local data = addon:GetUnitData(unit, config.elements, raw)
     addon:HideLines(tip, 2, 3)
     addon:HideLine(tip, "^"..LEVEL)
@@ -85,6 +86,7 @@ local function PlayerCharacter(tip, unit, config, raw)
 end
 
 local function NonPlayerCharacter(tip, unit, config, raw)
+    if not unit or not canaccessvalue(unit) then return end
     local levelLine = addon:FindLine(tip, "^"..LEVEL)
     if (levelLine or tip:NumLines() > 1) then
         local data = addon:GetUnitData(unit, config.elements, raw)
@@ -120,7 +122,7 @@ if type(TooltipDataProcessor) == "table" then
         if tip ~= GameTooltip then return end
         local _, unit = tip:GetUnit()
         local raw = addon:GetUnitInfo(unit)
-        if (UnitIsPlayer(unit)) then
+        if canaccessvalue(unit) and UnitIsPlayer(unit) then
             PlayerCharacter(tip, unit, addon.db.unit.player, raw)
         else
             NonPlayerCharacter(tip, unit, addon.db.unit.npc, raw)
